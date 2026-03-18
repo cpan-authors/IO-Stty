@@ -10,21 +10,30 @@ WriteMakefile(
     ABSTRACT_FROM => 'lib/IO/Stty.pm',
     PL_FILES      => {},
     ( $ExtUtils::MakeMaker::VERSION >= 6.3002 ? ( 'LICENSE' => 'perl', ) : () ),
-    PREREQ_PM => {
-        'Test::More' => 0,    # For testing
-    },
+    ( $ExtUtils::MakeMaker::VERSION >= 6.64 ? (
+        TEST_REQUIRES => {
+            'Test::More' => 0,
+        },
+    ) : (
+        PREREQ_PM => {
+            'Test::More' => 0,
+        },
+    )),
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES    => 'IO-Stty-*' },
     META_MERGE => {
-        build_requires => {
-            'Test::More'          => 0,    # For testing
-            'ExtUtils::MakeMaker' => 0,
-        },
+        'meta-spec' => { version => 2 },
         resources => {
-            license    => 'http://dev.perl.org/licenses/',
-            homepage   => 'http://wiki.github.com/toddr/IO-Stty',
-            bugtracker => 'http://github.com/toddr/IO-Stty/issues',
-            repository => 'http://github.com/toddr/IO-Stty',
+            license    => ['https://dev.perl.org/licenses/'],
+            homepage   => 'https://github.com/cpan-authors/IO-Stty',
+            bugtracker => {
+                web => 'https://github.com/cpan-authors/IO-Stty/issues',
+            },
+            repository => {
+                type => 'git',
+                url  => 'https://github.com/cpan-authors/IO-Stty.git',
+                web  => 'https://github.com/cpan-authors/IO-Stty',
+            },
         },
     },
 );
