@@ -37,3 +37,9 @@ WriteMakefile(
         },
     },
 );
+
+sub MY::postamble {
+    return "readme: lib/IO/Stty.pm\n"
+         . "\t\@perl -MPod::Markdown -e1 2>/dev/null || (echo 'Pod::Markdown is required: cpanm Pod::Markdown' >&2; exit 1)\n"
+         . "\tpod2markdown lib/IO/Stty.pm README.md\n";
+}

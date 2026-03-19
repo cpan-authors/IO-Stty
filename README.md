@@ -1,3 +1,5 @@
+[![testsuite](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml)
+
 # NAME
 
 IO::Stty - Change and print terminal line settings
@@ -300,6 +302,14 @@ character.
     Print version info.
 
 # Direct Subroutines
+
+- **\_parse\_char\_value()**
+
+        my $numeric = IO::Stty::_parse_char_value($value);
+
+    Parse a special character value from any of the supported notations:
+    literal integers, hat notation (`^c`), hexadecimal (`0x...`),
+    octal (`0...`), or `undef`/`^-` to disable.
 
 - **stty()**
 

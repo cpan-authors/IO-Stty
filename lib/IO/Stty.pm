@@ -26,6 +26,8 @@ BEGIN {
     }
 }
 
+=for markdown [![testsuite](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml)
+
 =head1 NAME
 
 IO::Stty - Change and print terminal line settings
