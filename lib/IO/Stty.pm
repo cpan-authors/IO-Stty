@@ -362,6 +362,57 @@ Print version info.
 
 =over 4
 
+=item B<_parse_char_value()>
+
+    my $numeric = IO::Stty::_parse_char_value($value);
+
+Parse a special character value from any of the supported notations:
+literal integers, hat notation (C<^c>), hexadecimal (C<0x...>),
+octal (C<0...>), or C<undef>/C<^-> to disable.
+
+=cut
+
+sub _parse_char_value {
+    my ($val) = @_;
+
+    # undef or ^- means disable the character
+    if ( $val eq 'undef' || $val eq '^-' ) {
+        return 0;
+    }
+
+    # Hat notation: ^c means Ctrl-C (0x03), ^? means DEL (0x7F)
+    if ( $val =~ /^\^(.)$/ ) {
+        my $ch = $1;
+        if ( $ch eq '?' ) {
+            return 0x7F;
+        }
+        return ord( uc($ch) ) & 0x1F;
+    }
+
+    # Hexadecimal: 0x...
+    if ( $val =~ /^0x([0-9a-fA-F]+)$/ ) {
+        return hex($1);
+    }
+
+    # Octal: 0 followed by digits (but not plain "0" which is decimal zero)
+    if ( $val =~ /^0(\d+)$/ ) {
+        return oct($1);
+    }
+
+    # Decimal integer (including plain 0)
+    if ( $val =~ /^\d+$/ ) {
+        return $val + 0;
+    }
+
+    # Single literal character
+    if ( length($val) == 1 ) {
+        return ord($val);
+    }
+
+    warn "IO::Stty: unrecognized character value '$val'\n";
+    return 0;
+}
+
 =item B<stty()>
 
     IO::Stty::stty(\*STDIN, @params);
@@ -552,17 +603,17 @@ sub stty {
         # Now the fun part.
 
         # c_cc field crap.
-        if ( $_ eq 'intr' )  { $control_chars{'INTR'}  = shift @parameters; next; }
-        if ( $_ eq 'quit' )  { $control_chars{'QUIT'}  = shift @parameters; next; }
-        if ( $_ eq 'erase' ) { $control_chars{'ERASE'} = shift @parameters; next; }
-        if ( $_ eq 'kill' )  { $control_chars{'KILL'}  = shift @parameters; next; }
-        if ( $_ eq 'eof' )   { $control_chars{'EOF'}   = shift @parameters; next; }
-        if ( $_ eq 'eol' )   { $control_chars{'EOL'}   = shift @parameters; next; }
-        if ( $_ eq 'start' ) { $control_chars{'START'} = shift @parameters; next; }
-        if ( $_ eq 'stop' )  { $control_chars{'STOP'}  = shift @parameters; next; }
-        if ( $_ eq 'susp' )  { $control_chars{'SUSP'}  = shift @parameters; next; }
-        if ( $_ eq 'min' )   { $control_chars{'MIN'}   = shift @parameters; next; }
-        if ( $_ eq 'time' )  { $control_chars{'TIME'}  = shift @parameters; next; }
+        if ( $_ eq 'intr' )  { $control_chars{'INTR'}  = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'quit' )  { $control_chars{'QUIT'}  = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'erase' ) { $control_chars{'ERASE'} = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'kill' )  { $control_chars{'KILL'}  = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'eof' )   { $control_chars{'EOF'}   = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'eol' )   { $control_chars{'EOL'}   = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'start' ) { $control_chars{'START'} = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'stop' )  { $control_chars{'STOP'}  = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'susp' )  { $control_chars{'SUSP'}  = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'min' )   { $control_chars{'MIN'}   = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'time' )  { $control_chars{'TIME'}  = _parse_char_value( shift @parameters ); next; }
 
         # c_cflag crap
         if ( $_ eq 'clocal' ) { $c_cflag = ( $set_value ? ( $c_cflag | CLOCAL ) : ( $c_cflag & ( ~CLOCAL ) ) ); next; }
