@@ -7,6 +7,24 @@ use POSIX;
 
 our $VERSION = '0.04';
 
+# Baud rate constants: standard POSIX rates plus modern rates.
+# Modern rates (B57600, B115200, B230400) are not available on all platforms,
+# so we use eval guards to include only what the current system supports.
+my %BAUD_RATES;
+my %BAUD_SPEEDS;
+BEGIN {
+    my @standard = qw(0 50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400);
+    my @modern   = qw(57600 115200 230400);
+    for my $rate (@standard, @modern) {
+        my $const = "POSIX::B$rate";
+        my $val = eval { no strict 'refs'; &$const() };
+        if (defined $val) {
+            $BAUD_RATES{$rate}  = $val;
+            $BAUD_SPEEDS{$val}  = $rate;
+        }
+    }
+}
+
 =head1 NAME
 
 IO::Stty - Change and print terminal line settings
@@ -593,16 +611,14 @@ sub stty {
         # Speed?
         if ( $_ eq 'ospeed' ) {
             my $rate = shift(@parameters);
-            my $func = POSIX->can("B$rate");
-            if ($func) { $ospeed = $func->(); }
-            else        { warn "IO::Stty::stty: unknown baud rate '$rate'\n"; }
+            exists $BAUD_RATES{$rate} or warn "IO::Stty::stty: unknown baud rate '$rate'\n";
+            $ospeed = $BAUD_RATES{$rate} if exists $BAUD_RATES{$rate};
             next;
         }
         if ( $_ eq 'ispeed' ) {
             my $rate = shift(@parameters);
-            my $func = POSIX->can("B$rate");
-            if ($func) { $ispeed = $func->(); }
-            else        { warn "IO::Stty::stty: unknown baud rate '$rate'\n"; }
+            exists $BAUD_RATES{$rate} or warn "IO::Stty::stty: unknown baud rate '$rate'\n";
+            $ispeed = $BAUD_RATES{$rate} if exists $BAUD_RATES{$rate};
             next;
         }
 
@@ -657,22 +673,9 @@ sub show_me_the_crap {
     # rs = return string
     my ($rs) = '';
     $rs .= 'speed ';
-    if ( $ospeed == B0 )     { $rs .= 0; }
-    if ( $ospeed == B50 )    { $rs .= 50; }
-    if ( $ospeed == B75 )    { $rs .= 75; }
-    if ( $ospeed == B110 )   { $rs .= 110; }
-    if ( $ospeed == B134 )   { $rs .= 134; }
-    if ( $ospeed == B150 )   { $rs .= 150; }
-    if ( $ospeed == B200 )   { $rs .= 200; }
-    if ( $ospeed == B300 )   { $rs .= 300; }
-    if ( $ospeed == B600 )   { $rs .= 600; }
-    if ( $ospeed == B1200 )  { $rs .= 1200; }
-    if ( $ospeed == B1800 )  { $rs .= 1800; }
-    if ( $ospeed == B2400 )  { $rs .= 2400; }
-    if ( $ospeed == B4800 )  { $rs .= 4800; }
-    if ( $ospeed == B9600 )  { $rs .= 9600; }
-    if ( $ospeed == B19200 ) { $rs .= 19200; }
-    if ( $ospeed == B38400 ) { $rs .= 38400; }
+    if ( exists $BAUD_SPEEDS{$ospeed} ) {
+        $rs .= $BAUD_SPEEDS{$ospeed};
+    }
     $rs .= " baud\n";
     $rs .= 'intr = ' . _cc_to_hat($cc{'INTR'}) . '; quit = ' . _cc_to_hat($cc{'QUIT'}) . '; erase = ' . _cc_to_hat($cc{'ERASE'}) . '; kill = ' . _cc_to_hat($cc{'KILL'}) . ";\n";
     $rs .= 'eof = ' . _cc_to_hat($cc{'EOF'}) . '; eol = ' . _cc_to_hat($cc{'EOL'}) . '; start = ' . _cc_to_hat($cc{'START'}) . '; stop = ' . _cc_to_hat($cc{'STOP'}) . '; susp = ' . _cc_to_hat($cc{'SUSP'}) . ";\n";
