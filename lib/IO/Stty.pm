@@ -373,7 +373,7 @@ sub stty {
 
     # make a terminal object.
     my ($termios) = POSIX::Termios->new();
-    $termios->getattr($file_num) || warn "Couldn't get terminal parameters for '$tty_name', fine num ($file_num)";
+    $termios->getattr($file_num) || warn "Couldn't get terminal parameters for '$tty_name', file num ($file_num)";
     my ($c_cflag) = $termios->getcflag;
     my ($c_iflag) = $termios->getiflag;
     my ($ispeed)  = $termios->getispeed;
@@ -396,7 +396,6 @@ sub stty {
     # OK.. we have our crap.
 
     my @parameters;
-    my $parameter_with_value_rx = qr/^()$/;
 
     if ( @_ == 1 ) {
 
@@ -418,7 +417,7 @@ sub stty {
         }
 
         # did we get the '-g' flag?
-        if ( $_[0] eq '-g' ) {
+        elsif ( $_[0] eq '-g' ) {
             return
                 "$c_cflag:$c_iflag:$ispeed:$c_lflag:$c_oflag:$ospeed:"
               . $control_chars{'INTR'} . ":"
@@ -592,8 +591,20 @@ sub stty {
         if ( $_ eq 'opost' ) { $c_oflag = ( ( $set_value ? ( $c_oflag | OPOST ) : ( $c_oflag & ( ~OPOST ) ) ) ); next; }
 
         # Speed?
-        if ( $_ eq 'ospeed' ) { $ospeed = &{ "POSIX::B" . shift(@parameters) }; next; }
-        if ( $_ eq 'ispeed' ) { $ispeed = &{ "POSIX::B" . shift(@parameters) }; next; }
+        if ( $_ eq 'ospeed' ) {
+            my $rate = shift(@parameters);
+            my $func = POSIX->can("B$rate");
+            if ($func) { $ospeed = $func->(); }
+            else        { warn "IO::Stty::stty: unknown baud rate '$rate'\n"; }
+            next;
+        }
+        if ( $_ eq 'ispeed' ) {
+            my $rate = shift(@parameters);
+            my $func = POSIX->can("B$rate");
+            if ($func) { $ispeed = $func->(); }
+            else        { warn "IO::Stty::stty: unknown baud rate '$rate'\n"; }
+            next;
+        }
 
         # Default.. parameter hasn't matched anything
         #    print "char:".sprintf("%lo",ord($_))."\n";

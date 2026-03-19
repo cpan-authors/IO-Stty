@@ -7,5 +7,6 @@ README.md
 scripts/stty.pl
 t/00-load.t
 t/01-functional.t
+t/02-single-arg.t
 t/99-pod-coverage.t
 t/99-pod.t
