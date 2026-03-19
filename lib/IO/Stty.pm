@@ -639,6 +639,14 @@ Needs documentation
 
 =cut
 
+sub _cc_to_hat {
+    my ($val) = @_;
+    return '<undef>' if !defined $val || $val == 0 || $val == 255;
+    return '^?' if $val == 127;
+    return '^' . chr( ord('@') + $val ) if $val >= 0 && $val < 32;
+    return chr($val);
+}
+
 sub show_me_the_crap {
     my (
         $c_cflag, $c_iflag, $ispeed, $c_lflag, $c_oflag,
@@ -666,10 +674,8 @@ sub show_me_the_crap {
     if ( $ospeed == B19200 ) { $rs .= 19200; }
     if ( $ospeed == B38400 ) { $rs .= 38400; }
     $rs .= " baud\n";
-    $rs .= <<EOM;
-intr = $cc{'INTR'}; quit = $cc{'QUIT'}; erase = $cc{'ERASE'}; kill = $cc{'KILL'};
-eof = $cc{'EOF'}; eol = $cc{'EOL'}; start = $cc{'START'}; stop = $cc{'STOP'}; susp = $cc{'SUSP'};
-EOM
+    $rs .= 'intr = ' . _cc_to_hat($cc{'INTR'}) . '; quit = ' . _cc_to_hat($cc{'QUIT'}) . '; erase = ' . _cc_to_hat($cc{'ERASE'}) . '; kill = ' . _cc_to_hat($cc{'KILL'}) . ";\n";
+    $rs .= 'eof = ' . _cc_to_hat($cc{'EOF'}) . '; eol = ' . _cc_to_hat($cc{'EOL'}) . '; start = ' . _cc_to_hat($cc{'START'}) . '; stop = ' . _cc_to_hat($cc{'STOP'}) . '; susp = ' . _cc_to_hat($cc{'SUSP'}) . ";\n";
 
     # c flags.
     $rs .= ( ( $c_cflag & CLOCAL ) ? '' : '-' ) . 'clocal ';
