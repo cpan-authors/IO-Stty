@@ -3,18 +3,24 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More;
 use IO::Stty;
-use POSIX qw(:termios_h);
+use POSIX ();
+
+my ( $CS8, $B9600 );
+eval { $CS8 = POSIX::CS8(); $B9600 = POSIX::B9600(); 1 }
+    or plan skip_all => 'POSIX termios constants not available on this platform';
+
+plan tests => 3;
 
 # Build a minimal set of arguments for show_me_the_crap.
 # Flags are all zero so every flag prints with '-' prefix.
-my $c_cflag = CS8;
+my $c_cflag = $CS8;
 my $c_iflag = 0;
 my $c_lflag = 0;
 my $c_oflag = 0;
-my $ispeed  = B9600;
-my $ospeed  = B9600;
+my $ispeed  = $B9600;
+my $ospeed  = $B9600;
 
 my %cc = (
     INTR  => 3,    # ^C
