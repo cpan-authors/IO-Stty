@@ -16,8 +16,9 @@ BEGIN {
     my @standard = qw(0 50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400);
     my @modern   = qw(57600 115200 230400);
     for my $rate (@standard, @modern) {
-        my $const = "POSIX::B$rate";
-        my $val = eval { no strict 'refs'; &$const() };
+        my $val = eval { POSIX->can("B$rate") };
+        next unless $val && ref($val) eq 'CODE';
+        $val = eval { $val->() };
         if (defined $val) {
             $BAUD_RATES{$rate}  = $val;
             $BAUD_SPEEDS{$val}  = $rate;
