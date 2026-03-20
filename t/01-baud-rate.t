@@ -35,6 +35,10 @@ subtest 'ospeed sets baud rate on pty' => sub {
 subtest 'ispeed sets baud rate on pty' => sub {
     my ( $pty, $slave ) = fresh_pty();
 
+    # Set ospeed first: Linux pty drivers normalize ispeed to match ospeed,
+    # so setting ispeed alone on a fresh pty (default ospeed != 9600) gets
+    # silently overridden by the kernel during setattr().
+    IO::Stty::stty( $slave, 'ospeed', '9600' );
     IO::Stty::stty( $slave, 'ispeed', '9600' );
     my $t = get_termios($slave);
     is( $t->getispeed, POSIX::B9600(), 'ispeed 9600 takes effect' );
