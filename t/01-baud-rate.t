@@ -71,7 +71,7 @@ subtest 'unknown baud rate produces warning, does not die' => sub {
         or diag "died with: $@";
 
     is( scalar @warnings, 1, 'exactly one warning emitted' );
-    like( $warnings[0] // '', qr/unknown baud rate '99999'/,
+    like( ( defined $warnings[0] ? $warnings[0] : '' ), qr/unknown baud rate '99999'/,
         'warning mentions the invalid rate' );
 };
 
@@ -139,7 +139,7 @@ subtest 'crafted baud rate cannot call arbitrary POSIX functions' => sub {
         'ospeed unchanged after rejected rate' );
 
     ok( @warnings >= 1, 'warning emitted for unknown rate' );
-    like( $warnings[0] // '', qr/unknown baud rate 'evil_test_probe'/,
+    like( ( defined $warnings[0] ? $warnings[0] : '' ), qr/unknown baud rate 'evil_test_probe'/,
         'warning names the rejected rate' );
 };
 
