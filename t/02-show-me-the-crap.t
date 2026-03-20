@@ -55,7 +55,7 @@ like(
 {
     my $bogus_speed = 99999;
     my $out = IO::Stty::show_me_the_crap(
-        $c_cflag, $c_iflag, $ispeed, $c_lflag, $c_oflag,
+        $c_cflag, $c_iflag, $bogus_speed, $c_lflag, $c_oflag,
         $bogus_speed, \%cc,
     );
     like( $out, qr/^speed 99999 baud;$/m, 'unknown ospeed shows raw numeric value' );
