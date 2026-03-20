@@ -1,5 +1,14 @@
 Revision history for Perl extension IO::Stty
 
+0.06 Thu Mar 20 2026
+
+  Bug fixes:
+   - Fix ispeed test failure on Linux ptys. The kernel pty driver
+     normalises ispeed to match ospeed, so setting ispeed alone without
+     ospeed causes the kernel to override the change. The test now sets
+     both speeds together in a single stty() call to avoid this kernel
+     normalisation. (GH #16, GH #18, PR #17, PR #21)
+
 0.05 Wed Mar 19 2026
 
   Bug fixes:
