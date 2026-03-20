@@ -11,7 +11,7 @@ my ( $CS8, $B9600 );
 eval { $CS8 = POSIX::CS8(); $B9600 = POSIX::B9600(); 1 }
     or plan skip_all => 'POSIX termios constants not available on this platform';
 
-plan tests => 3;
+plan tests => 4;
 
 # Build a minimal set of arguments for show_me_the_crap.
 # Flags are all zero so every flag prints with '-' prefix.
@@ -50,3 +50,13 @@ like(
     qr/^eof = \^D; eol = <undef>; start = \^Q; stop = \^S; susp = \^Z;$/m,
     'control chars line 2 uses hat notation',
 );
+
+# Unknown ospeed falls back to raw numeric value (e.g. OpenBSD ptys)
+{
+    my $bogus_speed = 99999;
+    my $out = IO::Stty::show_me_the_crap(
+        $c_cflag, $c_iflag, $ispeed, $c_lflag, $c_oflag,
+        $bogus_speed, \%cc,
+    );
+    like( $out, qr/^speed 99999 baud$/m, 'unknown ospeed shows raw numeric value' );
+}

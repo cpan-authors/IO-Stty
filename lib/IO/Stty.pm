@@ -730,6 +730,9 @@ sub show_me_the_crap {
     if ( exists $BAUD_SPEEDS{$ospeed} ) {
         $rs .= $BAUD_SPEEDS{$ospeed};
     }
+    else {
+        $rs .= $ospeed;
+    }
     $rs .= " baud\n";
     $rs .= 'intr = ' . _cc_to_hat($cc{'INTR'}) . '; quit = ' . _cc_to_hat($cc{'QUIT'}) . '; erase = ' . _cc_to_hat($cc{'ERASE'}) . '; kill = ' . _cc_to_hat($cc{'KILL'}) . ";\n";
     $rs .= 'eof = ' . _cc_to_hat($cc{'EOF'}) . '; eol = ' . _cc_to_hat($cc{'EOL'}) . '; start = ' . _cc_to_hat($cc{'START'}) . '; stop = ' . _cc_to_hat($cc{'STOP'}) . '; susp = ' . _cc_to_hat($cc{'SUSP'}) . ";\n";
