@@ -473,7 +473,7 @@ sub stty {
 
         # handle the one-arg cases specifically
         # Version info
-        if ( $_[0] =~ /^(-v|version)$/ ) {
+        if ( $_[0] =~ /^(-v|--version|version)$/ ) {
             return $IO::Stty::VERSION . "\n";
         }
         elsif ( $_[0] =~ /^\d+$/ ) {
