@@ -281,9 +281,12 @@ character.
 
     Set the input and output speeds to N.  N can be one
     of: 0 50 75 110 134 134.5 150 200 300 600 1200 1800
-    2400 4800 9600 19200 38400 exta extb.  exta is  the
-    same  as 19200; extb is the same as 38400.  0 hangs
-    up the line if -clocal is set.
+    2400 4800 9600 19200 38400 57600 115200 230400 exta
+    extb.  134.5 is the same as 134; exta is the same
+    as 19200; extb is the same as 38400.  Modern rates
+    (57600, 115200, 230400) are only available on
+    platforms whose POSIX implementation defines them.
+    0 hangs up the line if -clocal is set.
 
 ## OPTIONS
 

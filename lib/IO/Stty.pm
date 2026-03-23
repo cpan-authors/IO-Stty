@@ -24,6 +24,10 @@ BEGIN {
             $BAUD_SPEEDS{$val}  = $rate;
         }
     }
+    # Standard aliases: 134.5 → B134, exta → B19200, extb → B38400
+    $BAUD_RATES{'134.5'} = $BAUD_RATES{'134'}   if exists $BAUD_RATES{'134'};
+    $BAUD_RATES{'exta'}  = $BAUD_RATES{'19200'} if exists $BAUD_RATES{'19200'};
+    $BAUD_RATES{'extb'}  = $BAUD_RATES{'38400'} if exists $BAUD_RATES{'38400'};
 }
 
 =for markdown [![testsuite](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml)
@@ -335,9 +339,12 @@ been read, when -icanon is set.
 
 Set the input and output speeds to N.  N can be one
 of: 0 50 75 110 134 134.5 150 200 300 600 1200 1800
-2400 4800 9600 19200 38400 exta extb.  exta is  the
-same  as 19200; extb is the same as 38400.  0 hangs
-up the line if -clocal is set.
+2400 4800 9600 19200 38400 57600 115200 230400 exta
+extb.  134.5 is the same as 134; exta is the same
+as 19200; extb is the same as 38400.  Modern rates
+(57600, 115200, 230400) are only available on
+platforms whose POSIX implementation defines them.
+0 hangs up the line if -clocal is set.
 
 =back
 
@@ -476,7 +483,9 @@ sub stty {
         if ( $_[0] =~ /^(-v|--version|version)$/ ) {
             return $IO::Stty::VERSION . "\n";
         }
-        elsif ( $_[0] =~ /^\d+$/ ) {
+        elsif ( $_[0] =~ /^\d+$/ || $_[0] eq '134.5'
+            || $_[0] eq 'exta' || $_[0] eq 'extb' )
+        {
             push( @parameters, 'ispeed', $_[0], 'ospeed', $_[0] );
         }
 
