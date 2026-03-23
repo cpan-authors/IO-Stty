@@ -757,7 +757,7 @@ sub show_me_the_crap {
     $rs .= "\n";
     $rs .= 'intr = ' . _cc_to_hat($cc{'INTR'}) . '; quit = ' . _cc_to_hat($cc{'QUIT'}) . '; erase = ' . _cc_to_hat($cc{'ERASE'}) . '; kill = ' . _cc_to_hat($cc{'KILL'}) . ";\n";
     $rs .= 'eof = ' . _cc_to_hat($cc{'EOF'}) . '; eol = ' . _cc_to_hat($cc{'EOL'}) . '; start = ' . _cc_to_hat($cc{'START'}) . '; stop = ' . _cc_to_hat($cc{'STOP'}) . '; susp = ' . _cc_to_hat($cc{'SUSP'}) . ";\n";
-    $rs .= 'min = ' . ($cc{'MIN'} // 0) . '; time = ' . ($cc{'TIME'} // 0) . ";\n";
+    $rs .= 'min = ' . (defined $cc{'MIN'} ? $cc{'MIN'} : 0) . '; time = ' . (defined $cc{'TIME'} ? $cc{'TIME'} : 0) . ";\n";
 
     # c flags.
     $rs .= ( ( $c_cflag & CLOCAL ) ? '' : '-' ) . 'clocal ';
