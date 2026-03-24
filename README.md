@@ -208,11 +208,17 @@ turned off by preceding it with a \`-'.
 
     With  \`-',  same  as parenb istrip cs7.
 
+- crt
+
+    Same as:
+
+        echoe echok
+
 - dec
 
     Same as:
 
-        echoe echoctl echoke -ixany
+        echoe echok
 
     Also sets the interrupt special character to Ctrl-C, erase to
     Del, and kill to Ctrl-U.

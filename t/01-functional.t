@@ -279,6 +279,31 @@ subtest 'dec combination' => sub {
     is($t->getcc(VKILL),  21,  'dec: kill=21');
 };
 
+subtest 'crt combination' => sub {
+    my ($pty, $slave) = fresh_pty();
+    # Clear echoe/echok first so we can verify crt sets them
+    IO::Stty::stty($slave, '-echoe', '-echok');
+    my $t = get_termios($slave);
+    ok(!($t->getlflag & ECHOE), 'echoe cleared before crt');
+
+    IO::Stty::stty($slave, 'crt');
+    $t = get_termios($slave);
+    ok($t->getlflag & ECHOE, 'crt: echoe set');
+    ok($t->getlflag & ECHOK, 'crt: echok set');
+};
+
+subtest 'crterase alias for echoe' => sub {
+    my ($pty, $slave) = fresh_pty();
+
+    IO::Stty::stty($slave, '-crterase');
+    my $t = get_termios($slave);
+    ok(!($t->getlflag & ECHOE), 'crterase clears ECHOE');
+
+    IO::Stty::stty($slave, 'crterase');
+    $t = get_termios($slave);
+    ok($t->getlflag & ECHOE, 'crterase sets ECHOE');
+};
+
 # ── 5. Control character assignment ───────────────────────────────────
 
 subtest 'set control chars by integer' => sub {
