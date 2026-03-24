@@ -563,7 +563,7 @@ sub stty {
             unshift(
                 @parameters, 'cread', '-ignbrk', 'brkint', '-inlcr', '-igncr', 'icrnl',
                 '-ixoff', 'opost', 'isig', 'icanon', 'iexten', 'echo', 'echoe', 'echok',
-                '-echonl', '-noflsh', '-tostop', 'echok', 'intr', 3, 'quit', 28, 'erase',
+                '-echonl', '-noflsh', '-tostop', 'intr', 3, 'quit', 28, 'erase',
                 8,      'kill', 21,    'eof', 4, 'eol', 0, 'stop', 19, 'start', 17, 'susp', 26,
                 'time', 0,      'min', 0
             );
