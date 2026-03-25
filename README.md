@@ -223,6 +223,36 @@ turned off by preceding it with a \`-'.
     Also sets the interrupt special character to Ctrl-C, erase to
     Del, and kill to Ctrl-U.
 
+- \[-\]cbreak
+
+    Same as `-icanon` (with `-`, same as `icanon`).
+
+- evenp, parity
+
+    Same as:
+
+        parenb -parodd cs7
+
+- oddp
+
+    Same as:
+
+        parenb parodd cs7
+
+- -evenp, -parity, -oddp
+
+    Same as:
+
+        -parenb cs8
+
+- \[-\]litout
+
+    Same as:
+
+        -parenb -istrip -opost cs8
+
+    With `-`, same as `parenb istrip opost cs7`.
+
 ## Special characters
 
 The special characters' default values vary from system to
