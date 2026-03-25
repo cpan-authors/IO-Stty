@@ -258,11 +258,17 @@ Same as:
 
 With  `-',  same  as parenb istrip cs7.
 
+=item crt
+
+Same as:
+
+    echoe echok
+
 =item dec
 
 Same as:
 
-    echoe echoctl echoke -ixany
+    echoe echok
 
 Also sets the interrupt special character to Ctrl-C, erase to
 Del, and kill to Ctrl-U.
@@ -658,7 +664,7 @@ sub stty {
         # Are we there yet? No. Are we there yet? No. Are we there yet...
         #    print "Values: $c_lflag,".($c_lflag | ECHO)." ".($c_lflag & (~ECHO))."\n";
         if ( $_ eq 'echo' )   { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHO )   : ( $c_lflag & ( ~ECHO ) ) ) );   next; }
-        if ( $_ eq 'echoe' )  { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHOE )  : ( $c_lflag & ( ~ECHOE ) ) ) );  next; }
+        if ( $_ eq 'echoe' || $_ eq 'crterase' )  { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHOE )  : ( $c_lflag & ( ~ECHOE ) ) ) );  next; }
         if ( $_ eq 'echok' )  { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHOK )  : ( $c_lflag & ( ~ECHOK ) ) ) );  next; }
         if ( $_ eq 'echonl' ) { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHONL ) : ( $c_lflag & ( ~ECHONL ) ) ) ); next; }
         if ( $_ eq 'icanon' ) { $c_lflag = ( ( $set_value ? ( $c_lflag | ICANON ) : ( $c_lflag & ( ~ICANON ) ) ) ); next; }
