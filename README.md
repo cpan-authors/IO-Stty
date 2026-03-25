@@ -161,6 +161,11 @@ turned off by preceding it with a \`-'.
 
     \* Though this claims non-posixhood it is supported by the perl POSIX.pm.
 
+- \[-\]iexten
+
+    Enable implementation-defined input processing.  This is needed for
+    special characters like werase and lnext to be recognized.
+
 - \[-\]tostop (np)
 
     Stop background jobs that try to write to the terminal.
@@ -353,6 +358,10 @@ character.
 - **stty()**
 
         IO::Stty::stty(\*STDIN, @params);
+
+    Returns a string for query options (`-a`, `-g`, `-v`), `undef` if
+    the handle is not a terminal or if the terminal parameters could not be
+    read, and a true value on success when setting parameters.
 
     From comments:
 

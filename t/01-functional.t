@@ -408,4 +408,36 @@ subtest 'non-tty handle returns undef' => sub {
     close $fh;
 };
 
+# ── 9. iexten flag ─────────────────────────────────────────────────────
+
+subtest 'toggle iexten flag' => sub {
+    my ($pty, $slave) = fresh_pty();
+
+    IO::Stty::stty($slave, 'iexten');
+    my $t = get_termios($slave);
+    ok($t->getlflag & IEXTEN, 'iexten is set after stty iexten');
+
+    IO::Stty::stty($slave, '-iexten');
+    $t = get_termios($slave);
+    ok(!($t->getlflag & IEXTEN), 'iexten is cleared after stty -iexten');
+};
+
+# ── 10. Return value on set operations ─────────────────────────────────
+
+subtest 'stty returns true on successful set' => sub {
+    my ($pty, $slave) = fresh_pty();
+
+    my $result = IO::Stty::stty($slave, 'echo');
+    ok($result, 'stty returns true value when setting flags');
+};
+
+# ── 11. iexten shown in -a output ─────────────────────────────────────
+
+subtest 'iexten appears in -a output' => sub {
+    my ($pty, $slave) = fresh_pty();
+
+    my $output = IO::Stty::stty($slave, '-a');
+    like($output, qr/-?iexten/, '-a output includes iexten');
+};
+
 done_testing;

@@ -216,6 +216,11 @@ Disable flushing after interrupt and quit special characters.
 
 * Though this claims non-posixhood it is supported by the perl POSIX.pm.
 
+=item [-]iexten
+
+Enable implementation-defined input processing.  This is needed for
+special characters like werase and lnext to be recognized.
+
 =item [-]tostop (np)
 
 Stop background jobs that try to write to the terminal.
@@ -474,6 +479,10 @@ sub _parse_char_value {
 
     IO::Stty::stty(\*STDIN, @params);
 
+Returns a string for query options (C<-a>, C<-g>, C<-v>), C<undef> if
+the handle is not a terminal or if the terminal parameters could not be
+read, and a true value on success when setting parameters.
+
 From comments:
 
     I'm not feeling very inspired about this. Terminal parameters are obscure
@@ -499,7 +508,10 @@ sub stty {
 
     # make a terminal object.
     my ($termios) = POSIX::Termios->new();
-    $termios->getattr($file_num) || warn "Couldn't get terminal parameters for '$tty_name', file num ($file_num)";
+    unless ( $termios->getattr($file_num) ) {
+        warn "Couldn't get terminal parameters for '$tty_name', file num ($file_num)";
+        return undef;
+    }
     my ($c_cflag) = $termios->getcflag;
     my ($c_iflag) = $termios->getiflag;
     my ($ispeed)  = $termios->getispeed;
@@ -810,8 +822,8 @@ sub stty {
     $termios->setcc( VSTART, $control_chars{'START'} );
     $termios->setcc( VSTOP,  $control_chars{'STOP'} );
     $termios->setcc( VSUSP,  $control_chars{'SUSP'} );
-    $termios->setattr( $file_num, TCSANOW );    # TCSANOW = do immediately. don't unbuffer first.
-                                                # OK.. that sucked.
+    return $termios->setattr( $file_num, TCSANOW );    # TCSANOW = do immediately. don't unbuffer first.
+                                                      # OK.. that sucked.
 }
 
 =item B<show_me_the_crap()>
