@@ -267,6 +267,36 @@ Same as:
 Also sets the interrupt special character to Ctrl-C, erase to
 Del, and kill to Ctrl-U.
 
+=item [-]cbreak
+
+Same as C<-icanon> (with C<->, same as C<icanon>).
+
+=item evenp, parity
+
+Same as:
+
+    parenb -parodd cs7
+
+=item oddp
+
+Same as:
+
+    parenb parodd cs7
+
+=item -evenp, -parity, -oddp
+
+Same as:
+
+    -parenb cs8
+
+=item [-]litout
+
+Same as:
+
+    -parenb -istrip -opost cs8
+
+With C<->, same as C<parenb istrip opost cs7>.
+
 =back
 
 =head2 Special characters
@@ -606,6 +636,34 @@ sub stty {
 
             # 127 == delete, no?
             unshift( @parameters, 'echoe', 'echok', 'intr', 3, 'erase', 127, 'kill', 21 );
+            next;
+        }
+        if ( $_ eq 'evenp' || $_ eq 'parity' ) {
+            unshift( @parameters, 'parenb', '-parodd', 'cs7' );
+            next;
+        }
+        if ( $_ eq '-evenp' || $_ eq '-parity' || $_ eq '-oddp' ) {
+            unshift( @parameters, '-parenb', 'cs8' );
+            next;
+        }
+        if ( $_ eq 'oddp' ) {
+            unshift( @parameters, 'parenb', 'parodd', 'cs7' );
+            next;
+        }
+        if ( $_ eq 'cbreak' ) {
+            unshift( @parameters, '-icanon' );
+            next;
+        }
+        if ( $_ eq '-cbreak' ) {
+            unshift( @parameters, 'icanon' );
+            next;
+        }
+        if ( $_ eq 'litout' ) {
+            unshift( @parameters, '-parenb', '-istrip', '-opost', 'cs8' );
+            next;
+        }
+        if ( $_ eq '-litout' ) {
+            unshift( @parameters, 'parenb', 'istrip', 'opost', 'cs7' );
             next;
         }
         $set_value = 1;              # On by default...
