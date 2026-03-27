@@ -1,5 +1,25 @@
 Revision history for Perl extension IO::Stty
 
+0.08 Thu Mar 27 2026
+
+  Bug fixes:
+   - Fix Perl 5.8.9 smoker failure caused by // (defined-or) operator
+     in show_me_the_crap() min/time output line. Replaced with ternary
+     equivalent. The // operator requires Perl 5.10+. (GH #41)
+
+  Improvements:
+   - Add evenp, oddp, parity, cbreak, and litout combination aliases
+     matching GNU stty behavior. (PR #35)
+   - Add crterase alias for echoe, matching GNU stty. (PR #33)
+   - Add exta, extb, and 134.5 baud rate aliases. (PR #32)
+
+  Bug fixes (cont.):
+   - Fix dec combination to use echoe/echok (matching GNU stty)
+     instead of incorrect echoctl/echoke/-ixany flags. (PR #33)
+
+  Maintenance:
+   - Add strict/warnings to boilerplate tests. (PR #34)
+
 0.07 Sun Mar 22 2026
 
   Bug fixes:

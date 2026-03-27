@@ -5,7 +5,7 @@ use warnings;
 
 use POSIX;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # Baud rate constants: standard POSIX rates plus modern rates.
 # Modern rates (B57600, B115200, B230400) are not available on all platforms,
