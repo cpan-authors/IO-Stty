@@ -765,13 +765,40 @@ sub stty {
     $termios->setcc( VQUIT,  $control_chars{'QUIT'} );
     $termios->setcc( VERASE, $control_chars{'ERASE'} );
     $termios->setcc( VKILL,  $control_chars{'KILL'} );
-    $termios->setcc( VEOF,   $control_chars{'EOF'} );
-    $termios->setcc( VTIME,  $control_chars{'TIME'} );
-    $termios->setcc( VMIN,   $control_chars{'MIN'} );
+
+    # On some systems (e.g. Solaris/SVR4), VEOF==VMIN and VEOL==VTIME
+    # share the same cc slot.  The slot's meaning depends on ICANON:
+    # canonical mode uses VEOF/VEOL, non-canonical uses VMIN/VTIME.
+    # Writing both would let the second overwrite the first, so we
+    # write only the one that matches the final ICANON state.
+    if (VEOF == VMIN) {
+        if ($c_lflag & ICANON) {
+            $termios->setcc( VEOF, $control_chars{'EOF'} );
+        }
+        else {
+            $termios->setcc( VMIN, $control_chars{'MIN'} );
+        }
+    }
+    else {
+        $termios->setcc( VEOF, $control_chars{'EOF'} );
+        $termios->setcc( VMIN, $control_chars{'MIN'} );
+    }
+    if (VEOL == VTIME) {
+        if ($c_lflag & ICANON) {
+            $termios->setcc( VEOL, $control_chars{'EOL'} );
+        }
+        else {
+            $termios->setcc( VTIME, $control_chars{'TIME'} );
+        }
+    }
+    else {
+        $termios->setcc( VTIME, $control_chars{'TIME'} );
+        $termios->setcc( VEOL,  $control_chars{'EOL'} );
+    }
+
     $termios->setcc( VSTART, $control_chars{'START'} );
     $termios->setcc( VSTOP,  $control_chars{'STOP'} );
     $termios->setcc( VSUSP,  $control_chars{'SUSP'} );
-    $termios->setcc( VEOL,   $control_chars{'EOL'} );
     $termios->setattr( $file_num, TCSANOW );    # TCSANOW = do immediately. don't unbuffer first.
                                                 # OK.. that sucked.
 }

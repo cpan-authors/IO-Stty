@@ -346,7 +346,10 @@ subtest 'set min and time' => sub {
 
 subtest '-a output shows min and time' => sub {
     my ($pty, $slave) = fresh_pty();
-    IO::Stty::stty($slave, 'min', 3, 'time', 7);
+    # min/time are only meaningful in non-canonical mode; on systems where
+    # VEOF==VMIN (e.g. Solaris), setting min/time while ICANON is on would
+    # overwrite the eof/eol slots instead.
+    IO::Stty::stty($slave, '-icanon', 'min', 3, 'time', 7);
     my $output = IO::Stty::stty($slave, '-a');
     like($output, qr/min = 3/, '-a shows min value');
     like($output, qr/time = 7/, '-a shows time value');
