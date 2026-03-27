@@ -1,5 +1,23 @@
 Revision history for Perl extension IO::Stty
 
+0.08 Thu Mar 27 2026
+
+  Bug fixes:
+   - Replace // (defined-or) operator in show_me_the_crap() with
+     Perl 5.8 compatible ternary. On Perl 5.8 the // was misinterpreted
+     as an empty regex, causing "Unmatched ) in regex" fatal errors in
+     t/02-show-me-the-crap.t and t/baud-rates.t on CPAN Testers.
+     (GH #28, GH #29, GH #39, GH #40)
+
+  Improvements:
+   - Add evenp, oddp, parity, cbreak, and litout combination aliases
+     matching GNU stty behavior. (PR #35)
+   - Implement crterase alias and correct dec/crt documentation. (PR #33)
+   - Add exta, extb, and 134.5 baud rate aliases. (PR #32)
+
+  Maintenance:
+   - Add strict/warnings to boilerplate tests. (PR #34)
+
 0.07 Sun Mar 22 2026
 
   Bug fixes:
