@@ -7,6 +7,15 @@ use POSIX;
 
 our $VERSION = '0.07';
 
+# _POSIX_VDISABLE: the value that disables a special character slot.
+# On Linux this is typically 0; on macOS/BSD it is typically 255 (0xFF).
+# Fall back to 0 if the platform doesn't define it.
+my $VDISABLE;
+BEGIN {
+    $VDISABLE = eval { POSIX::_POSIX_VDISABLE() };
+    $VDISABLE = 0 unless defined $VDISABLE;
+}
+
 # Baud rate constants: standard POSIX rates plus modern rates.
 # Modern rates (B57600, B115200, B230400) are not available on all platforms,
 # so we use eval guards to include only what the current system supports.
@@ -314,7 +323,8 @@ either literally, in hat notation (`^c'), or as an integer
 which may start with `0x' to indicate hexadecimal, `0' to
 indicate octal, or any other digit to indicate decimal.
 Giving a value of `^-' or `undef' disables that special
-character.
+character (sets it to C<_POSIX_VDISABLE>, which is 0 on
+Linux and 255 on macOS/BSD).
 
 =over 4
 
@@ -414,7 +424,8 @@ Print version info.
 
 Parse a special character value from any of the supported notations:
 literal integers, hat notation (C<^c>), hexadecimal (C<0x...>),
-octal (C<0...>), or C<undef>/C<^-> to disable.
+octal (C<0...>), or C<undef>/C<^-> to disable (returns
+C<_POSIX_VDISABLE>).
 
 =cut
 
@@ -423,7 +434,7 @@ sub _parse_char_value {
 
     # undef or ^- means disable the character
     if ( $val eq 'undef' || $val eq '^-' ) {
-        return 0;
+        return $VDISABLE;
     }
 
     # Hat notation: ^c means Ctrl-C (0x03), ^? means DEL (0x7F)
@@ -600,7 +611,7 @@ sub stty {
                 @parameters, 'cread', '-ignbrk', 'brkint', '-inlcr', '-igncr', 'icrnl',
                 '-ixoff', 'opost', 'isig', 'icanon', 'iexten', 'echo', 'echoe', 'echok',
                 '-echonl', '-noflsh', '-tostop', 'intr', 3, 'quit', 28, 'erase',
-                8,      'kill', 21,    'eof', 4, 'eol', 0, 'stop', 19, 'start', 17, 'susp', 26,
+                8,      'kill', 21,    'eof', 4, 'eol', 'undef', 'stop', 19, 'start', 17, 'susp', 26,
                 'time', 0,      'min', 0
             );
             next;
@@ -614,7 +625,7 @@ sub stty {
                 @parameters, 'brkint', 'ignpar', 'istrip', 'icrnl', 'ixon', 'opost',
                 'isig',      'icanon',
                 'intr', 3, 'quit', 28, 'erase', 8, 'kill', 21, 'eof',
-                4, 'eol', 0, 'stop', 19, 'start', 17, 'susp', 26, 'time', 0, 'min', 0
+                4, 'eol', 'undef', 'stop', 19, 'start', 17, 'susp', 26, 'time', 0, 'min', 0
             );
             next;
         }
@@ -821,7 +832,7 @@ This is the back-end for C<stty(\*FH, '-a')>.
 
 sub _cc_to_hat {
     my ($val) = @_;
-    return '<undef>' if !defined $val || $val == 0 || $val == 255;
+    return '<undef>' if !defined $val || $val == $VDISABLE || $val == 0 || $val == 255;
     return '^?' if $val == 127;
     return '^' . chr( ord('@') + $val ) if $val >= 0 && $val < 32;
     return chr($val);
