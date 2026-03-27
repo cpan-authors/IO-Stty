@@ -326,14 +326,19 @@ subtest 'set control chars by hat notation' => sub {
 };
 
 subtest 'disable control char with undef' => sub {
+    # _POSIX_VDISABLE is the platform-specific value for "disabled"
+    # (0 on Linux, 255 on macOS/BSD)
+    my $VDISABLE = eval { POSIX::_POSIX_VDISABLE() };
+    $VDISABLE = 0 unless defined $VDISABLE;
+
     my ($pty, $slave) = fresh_pty();
     IO::Stty::stty($slave, 'eol', 'undef');
     my $t = get_termios($slave);
-    is($t->getcc(VEOL), 0, 'eol disabled via undef');
+    is($t->getcc(VEOL), $VDISABLE, 'eol disabled via undef (uses _POSIX_VDISABLE)');
 
     IO::Stty::stty($slave, 'eol', '^-');
     $t = get_termios($slave);
-    is($t->getcc(VEOL), 0, 'eol disabled via ^-');
+    is($t->getcc(VEOL), $VDISABLE, 'eol disabled via ^- (uses _POSIX_VDISABLE)');
 };
 
 subtest 'set min and time' => sub {
