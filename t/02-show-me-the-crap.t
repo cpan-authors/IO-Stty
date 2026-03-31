@@ -13,6 +13,10 @@ eval { $CS8 = POSIX::CS8(); $B9600 = POSIX::B9600(); 1 }
 
 plan tests => 8;
 
+# Determine platform's VDISABLE value (0 on Linux, 255 on macOS/BSD)
+my $VDISABLE = eval { POSIX::_POSIX_VDISABLE() };
+$VDISABLE = 0 unless defined $VDISABLE;
+
 # Build a minimal set of arguments for show_me_the_crap.
 # Flags are all zero so every flag prints with '-' prefix.
 my $c_cflag = $CS8;
@@ -23,15 +27,15 @@ my $ispeed  = $B9600;
 my $ospeed  = $B9600;
 
 my %cc = (
-    INTR  => 3,    # ^C
-    QUIT  => 28,   # ^\
-    ERASE => 127,  # ^?
-    KILL  => 21,   # ^U
-    EOF   => 4,    # ^D
-    EOL   => 0,    # <undef>
-    START => 17,   # ^Q
-    STOP  => 19,   # ^S
-    SUSP  => 26,   # ^Z
+    INTR  => 3,          # ^C
+    QUIT  => 28,         # ^\
+    ERASE => 127,        # ^?
+    KILL  => 21,         # ^U
+    EOF   => 4,          # ^D
+    EOL   => $VDISABLE,  # <undef> (disabled)
+    START => 17,         # ^Q
+    STOP  => 19,         # ^S
+    SUSP  => 26,         # ^Z
     MIN   => 1,
     TIME  => 0,
 );

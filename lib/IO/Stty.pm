@@ -832,7 +832,7 @@ This is the back-end for C<stty(\*FH, '-a')>.
 
 sub _cc_to_hat {
     my ($val) = @_;
-    return '<undef>' if !defined $val || $val == $VDISABLE || $val == 0 || $val == 255;
+    return '<undef>' if !defined $val || $val == $VDISABLE;
     return '^?' if $val == 127;
     return '^' . chr( ord('@') + $val ) if $val >= 0 && $val < 32;
     return chr($val);
