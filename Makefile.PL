@@ -24,6 +24,23 @@ WriteMakefile(
     clean => { FILES    => 'IO-Stty-*' },
     META_MERGE => {
         'meta-spec' => { version => 2 },
+        provides => {
+            'IO::Stty' => {
+                file    => 'lib/IO/Stty.pm',
+                version => do {
+                    my $v;
+                    if (open my $fh, '<', 'lib/IO/Stty.pm') {
+                        while (<$fh>) {
+                            if (/\$VERSION\s*=\s*'([^']+)'/) {
+                                $v = $1;
+                                last;
+                            }
+                        }
+                    }
+                    $v || '0';
+                },
+            },
+        },
         resources => {
             license    => ['https://dev.perl.org/licenses/'],
             homepage   => 'https://github.com/cpan-authors/IO-Stty',
