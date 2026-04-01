@@ -11,7 +11,7 @@ my ( $CS8, $B9600 );
 eval { $CS8 = POSIX::CS8(); $B9600 = POSIX::B9600(); 1 }
     or plan skip_all => 'POSIX termios constants not available on this platform';
 
-plan tests => 8;
+plan tests => 9;
 
 # Build a minimal set of arguments for show_me_the_crap.
 # Flags are all zero so every flag prints with '-' prefix.
@@ -99,3 +99,6 @@ like(
     );
     unlike( $out, qr/ispeed/, 'ispeed not shown when equal to ospeed' );
 }
+
+# Every settable iflag should appear in -a output (igncr was missing before)
+like( $output, qr/-igncr/, '-a output includes igncr flag' );

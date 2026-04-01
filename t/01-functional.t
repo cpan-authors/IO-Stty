@@ -96,6 +96,30 @@ subtest 'iflag settings (icrnl, ixon)' => sub {
     ok($t->getiflag & IXON,  'ixon re-enabled');
 };
 
+subtest 'igncr toggle' => sub {
+    my ($pty, $slave) = fresh_pty();
+
+    IO::Stty::stty($slave, 'igncr');
+    my $t = get_termios($slave);
+    ok($t->getiflag & IGNCR, 'igncr set');
+
+    IO::Stty::stty($slave, '-igncr');
+    $t = get_termios($slave);
+    ok(!($t->getiflag & IGNCR), 'igncr cleared');
+};
+
+subtest '-a output shows igncr' => sub {
+    my ($pty, $slave) = fresh_pty();
+
+    IO::Stty::stty($slave, 'igncr');
+    my $output = IO::Stty::stty($slave, '-a');
+    like($output, qr/(?<!\-)igncr/, '-a shows igncr when set');
+
+    IO::Stty::stty($slave, '-igncr');
+    $output = IO::Stty::stty($slave, '-a');
+    like($output, qr/-igncr/, '-a shows -igncr when cleared');
+};
+
 subtest 'oflag (opost)' => sub {
     my ($pty, $slave) = fresh_pty();
 
