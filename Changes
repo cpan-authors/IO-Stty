@@ -1,5 +1,32 @@
 Revision history for Perl extension IO::Stty
 
+0.08 Tue Apr 01 2026
+
+  Bug fixes:
+   - Fix remaining uses of the // (defined-or) operator in tests for
+     Perl 5.8 compatibility. (PR #30, #31)
+   - Use _POSIX_VDISABLE for disabling special characters instead of
+     hardcoded 0. The value is 0 on Linux but 255 on macOS/BSD; the old
+     code silently did the wrong thing on non-Linux platforms. (PR #37)
+   - Handle VEOF/VMIN and VEOL/VTIME sharing the same termios cc slot on
+     Solaris/SVR4. The slot's meaning depends on ICANON mode; writing both
+     unconditionally let the second overwrite the first. (PR #42)
+
+  Improvements:
+   - Add exta, extb, and 134.5 baud rate aliases matching GNU stty.
+     (PR #32)
+   - Implement crterase as an alias for echoe, and correct the dec/crt
+     combination documentation to remove non-POSIX flags (echoctl,
+     echoke, ixany) that this module does not support. (PR #33)
+   - Add evenp, oddp, parity, cbreak, and litout POSIX combination
+     aliases. These are widely used (e.g. cbreak for character-at-a-time
+     input) and match GNU stty behavior. (PR #35)
+
+  Maintenance:
+   - Add strict and warnings to boilerplate POD tests; remove stale
+     $private_subs variable from pod-coverage test. (PR #34)
+   - Regenerate README.md from updated POD.
+
 0.07 Sun Mar 22 2026
 
   Bug fixes:

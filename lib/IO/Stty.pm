@@ -5,7 +5,7 @@ use warnings;
 
 use POSIX;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # _POSIX_VDISABLE: the value that disables a special character slot.
 # On Linux this is typically 0; on macOS/BSD it is typically 255 (0xFF).
