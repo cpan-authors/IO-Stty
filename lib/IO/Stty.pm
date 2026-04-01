@@ -408,6 +408,10 @@ Print all current settings in a form  that  can  be
 used  as  an  argument  to  another stty command to
 restore the current settings.
 
+=item speed
+
+Print the output baud rate.
+
 =item -v,--version
 
 Print version info.
@@ -534,6 +538,12 @@ sub stty {
             || $_[0] eq 'exta' || $_[0] eq 'extb' )
         {
             push( @parameters, 'ispeed', $_[0], 'ospeed', $_[0] );
+        }
+
+        # Print just the output speed (matches GNU stty 'speed')
+        elsif ( $_[0] eq 'speed' ) {
+            my $speed_str = exists $BAUD_SPEEDS{$ospeed} ? $BAUD_SPEEDS{$ospeed} : $ospeed;
+            return "$speed_str\n";
         }
 
         # Do we want to know what the crap is?
