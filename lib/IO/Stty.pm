@@ -39,6 +39,42 @@ BEGIN {
     $BAUD_RATES{'extb'}  = $BAUD_RATES{'38400'} if exists $BAUD_RATES{'38400'};
 }
 
+# Flag-to-constant lookup tables: map stty parameter names to POSIX constants.
+# Aliases (hup→HUPCL, crterase→ECHOE) are just extra table entries.
+my %CFLAGS = (
+    clocal => CLOCAL, cread  => CREAD,  cstopb => CSTOPB,
+    hupcl  => HUPCL,  hup    => HUPCL,  parenb => PARENB,
+    parodd => PARODD,
+);
+my %IFLAGS = (
+    brkint => BRKINT, icrnl  => ICRNL,  ignbrk => IGNBRK,
+    igncr  => IGNCR,  ignpar => IGNPAR, inlcr  => INLCR,
+    inpck  => INPCK,  istrip => ISTRIP, ixoff  => IXOFF,
+    ixon   => IXON,   parmrk => PARMRK,
+);
+my %LFLAGS = (
+    echo     => ECHO,   echoe    => ECHOE,  crterase => ECHOE,
+    echok    => ECHOK,  echonl   => ECHONL, icanon   => ICANON,
+    iexten   => IEXTEN, isig     => ISIG,   noflsh   => NOFLSH,
+    tostop   => TOSTOP,
+);
+my %OFLAGS = (
+    opost => OPOST,
+);
+
+# Control character name → hash key mapping
+my %CC_NAMES = (
+    intr  => 'INTR',  quit  => 'QUIT',  erase => 'ERASE',
+    kill  => 'KILL',  eof   => 'EOF',   eol   => 'EOL',
+    start => 'START', stop  => 'STOP',  susp  => 'SUSP',
+    min   => 'MIN',   time  => 'TIME',
+);
+
+# Ordered display lists for show_me_the_crap — preserves GNU-like output order.
+my @CFLAG_DISPLAY = ( [CLOCAL,'clocal'], [CREAD,'cread'], [CSTOPB,'cstopb'], [HUPCL,'hupcl'], [PARENB,'parenb'], [PARODD,'parodd'] );
+my @LFLAG_DISPLAY = ( [ECHO,'echo'], [ECHOE,'echoe'], [ECHOK,'echok'], [ECHONL,'echonl'], [ICANON,'icanon'], [ISIG,'isig'], [NOFLSH,'noflsh'], [TOSTOP,'tostop'], [IEXTEN,'iexten'] );
+my @IFLAG_DISPLAY = ( [BRKINT,'brkint'], [IGNBRK,'ignbrk'], [IGNPAR,'ignpar'], [PARMRK,'parmrk'], [INPCK,'inpck'], [ISTRIP,'istrip'], [INLCR,'inlcr'], [ICRNL,'icrnl'], [IXON,'ixon'], [IXOFF,'ixoff'] );
+
 =for markdown [![testsuite](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml)
 
 =head1 NAME
@@ -711,62 +747,23 @@ sub stty {
 
         # Now the fun part.
 
-        # c_cc field crap.
-        if ( $_ eq 'intr' )  { $control_chars{'INTR'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'quit' )  { $control_chars{'QUIT'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'erase' ) { $control_chars{'ERASE'} = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'kill' )  { $control_chars{'KILL'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'eof' )   { $control_chars{'EOF'}   = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'eol' )   { $control_chars{'EOL'}   = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'start' ) { $control_chars{'START'} = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'stop' )  { $control_chars{'STOP'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'susp' )  { $control_chars{'SUSP'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'min' )   { $control_chars{'MIN'}   = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'time' )  { $control_chars{'TIME'}  = _parse_char_value( shift @parameters ); next; }
+        # Control character settings (intr, quit, erase, kill, etc.)
+        if ( exists $CC_NAMES{$_} ) {
+            $control_chars{ $CC_NAMES{$_} } = _parse_char_value( shift @parameters );
+            next;
+        }
 
-        # c_cflag crap
-        if ( $_ eq 'clocal' ) { $c_cflag = ( $set_value ? ( $c_cflag | CLOCAL ) : ( $c_cflag & ( ~CLOCAL ) ) ); next; }
-        if ( $_ eq 'cread' )  { $c_cflag = ( $set_value ? ( $c_cflag | CREAD )  : ( $c_cflag & ( ~CREAD ) ) );  next; }
+        # Character size (cs5-cs8) — special: mask and set, not a simple toggle
+        if ( $_ eq 'cs5' ) { $c_cflag = ( ( $c_cflag & ~CS8 ) | CS5 ); next; }
+        if ( $_ eq 'cs6' ) { $c_cflag = ( ( $c_cflag & ~CS8 ) | CS6 ); next; }
+        if ( $_ eq 'cs7' ) { $c_cflag = ( ( $c_cflag & ~CS8 ) | CS7 ); next; }
+        if ( $_ eq 'cs8' ) { $c_cflag = ( $c_cflag | CS8 );            next; }
 
-        # As best I can tell, doing |~CS8 will clear the bits.. under solaris
-        # anyway, where CS5 = 0, CS6 = 0x20, CS7= 0x40, CS8=0x60
-        if ( $_ eq 'cs5' )                  { $c_cflag = ( ( $c_cflag & ~CS8 ) | CS5 );                                       next; }
-        if ( $_ eq 'cs6' )                  { $c_cflag = ( ( $c_cflag & ~CS8 ) | CS6 );                                       next; }
-        if ( $_ eq 'cs7' )                  { $c_cflag = ( ( $c_cflag & ~CS8 ) | CS7 );                                       next; }
-        if ( $_ eq 'cs8' )                  { $c_cflag = ( $c_cflag | CS8 );                                                  next; }
-        if ( $_ eq 'cstopb' )               { $c_cflag = ( $set_value ? ( $c_cflag | CSTOPB ) : ( $c_cflag & ( ~CSTOPB ) ) ); next; }
-        if ( $_ eq 'hupcl' || $_ eq 'hup' ) { $c_cflag = ( $set_value ? ( $c_cflag | HUPCL ) : ( $c_cflag & ( ~HUPCL ) ) );   next; }
-        if ( $_ eq 'parenb' )               { $c_cflag = ( $set_value ? ( $c_cflag | PARENB ) : ( $c_cflag & ( ~PARENB ) ) ); next; }
-        if ( $_ eq 'parodd' )               { $c_cflag = ( $set_value ? ( $c_cflag | PARODD ) : ( $c_cflag & ( ~PARODD ) ) ); next; }
-
-        # That was fun. Still awake? c_iflag time.
-        if ( $_ eq 'brkint' ) { $c_iflag = ( ( $set_value ? ( $c_iflag | BRKINT ) : ( $c_iflag & ( ~BRKINT ) ) ) ); next; }
-        if ( $_ eq 'icrnl' )  { $c_iflag = ( ( $set_value ? ( $c_iflag | ICRNL )  : ( $c_iflag & ( ~ICRNL ) ) ) );  next; }
-        if ( $_ eq 'ignbrk' ) { $c_iflag = ( ( $set_value ? ( $c_iflag | IGNBRK ) : ( $c_iflag & ( ~IGNBRK ) ) ) ); next; }
-        if ( $_ eq 'igncr' )  { $c_iflag = ( ( $set_value ? ( $c_iflag | IGNCR )  : ( $c_iflag & ( ~IGNCR ) ) ) );  next; }
-        if ( $_ eq 'ignpar' ) { $c_iflag = ( ( $set_value ? ( $c_iflag | IGNPAR ) : ( $c_iflag & ( ~IGNPAR ) ) ) ); next; }
-        if ( $_ eq 'inlcr' )  { $c_iflag = ( ( $set_value ? ( $c_iflag | INLCR )  : ( $c_iflag & ( ~INLCR ) ) ) );  next; }
-        if ( $_ eq 'inpck' )  { $c_iflag = ( ( $set_value ? ( $c_iflag | INPCK )  : ( $c_iflag & ( ~INPCK ) ) ) );  next; }
-        if ( $_ eq 'istrip' ) { $c_iflag = ( ( $set_value ? ( $c_iflag | ISTRIP ) : ( $c_iflag & ( ~ISTRIP ) ) ) ); next; }
-        if ( $_ eq 'ixoff' )  { $c_iflag = ( ( $set_value ? ( $c_iflag | IXOFF )  : ( $c_iflag & ( ~IXOFF ) ) ) );  next; }
-        if ( $_ eq 'ixon' )   { $c_iflag = ( ( $set_value ? ( $c_iflag | IXON )   : ( $c_iflag & ( ~IXON ) ) ) );   next; }
-        if ( $_ eq 'parmrk' ) { $c_iflag = ( ( $set_value ? ( $c_iflag | PARMRK ) : ( $c_iflag & ( ~PARMRK ) ) ) ); next; }
-
-        # Are we there yet? No. Are we there yet? No. Are we there yet...
-        #    print "Values: $c_lflag,".($c_lflag | ECHO)." ".($c_lflag & (~ECHO))."\n";
-        if ( $_ eq 'echo' )   { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHO )   : ( $c_lflag & ( ~ECHO ) ) ) );   next; }
-        if ( $_ eq 'echoe' || $_ eq 'crterase' )  { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHOE )  : ( $c_lflag & ( ~ECHOE ) ) ) );  next; }
-        if ( $_ eq 'echok' )  { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHOK )  : ( $c_lflag & ( ~ECHOK ) ) ) );  next; }
-        if ( $_ eq 'echonl' ) { $c_lflag = ( ( $set_value ? ( $c_lflag | ECHONL ) : ( $c_lflag & ( ~ECHONL ) ) ) ); next; }
-        if ( $_ eq 'icanon' ) { $c_lflag = ( ( $set_value ? ( $c_lflag | ICANON ) : ( $c_lflag & ( ~ICANON ) ) ) ); next; }
-        if ( $_ eq 'iexten' ) { $c_lflag = ( ( $set_value ? ( $c_lflag | IEXTEN ) : ( $c_lflag & ( ~IEXTEN ) ) ) ); next; }
-        if ( $_ eq 'isig' )   { $c_lflag = ( ( $set_value ? ( $c_lflag | ISIG )   : ( $c_lflag & ( ~ISIG ) ) ) );   next; }
-        if ( $_ eq 'noflsh' ) { $c_lflag = ( ( $set_value ? ( $c_lflag | NOFLSH ) : ( $c_lflag & ( ~NOFLSH ) ) ) ); next; }
-        if ( $_ eq 'tostop' ) { $c_lflag = ( ( $set_value ? ( $c_lflag | TOSTOP ) : ( $c_lflag & ( ~TOSTOP ) ) ) ); next; }
-
-        # Make it stop! Make it stop!
-        # c_oflag crap.
-        if ( $_ eq 'opost' ) { $c_oflag = ( ( $set_value ? ( $c_oflag | OPOST ) : ( $c_oflag & ( ~OPOST ) ) ) ); next; }
+        # Flag tables: cflag, iflag, lflag, oflag
+        if ( exists $CFLAGS{$_} ) { $c_cflag = ( $set_value ? ( $c_cflag | $CFLAGS{$_} ) : ( $c_cflag & ~$CFLAGS{$_} ) ); next; }
+        if ( exists $IFLAGS{$_} ) { $c_iflag = ( $set_value ? ( $c_iflag | $IFLAGS{$_} ) : ( $c_iflag & ~$IFLAGS{$_} ) ); next; }
+        if ( exists $LFLAGS{$_} ) { $c_lflag = ( $set_value ? ( $c_lflag | $LFLAGS{$_} ) : ( $c_lflag & ~$LFLAGS{$_} ) ); next; }
+        if ( exists $OFLAGS{$_} ) { $c_oflag = ( $set_value ? ( $c_oflag | $OFLAGS{$_} ) : ( $c_oflag & ~$OFLAGS{$_} ) ); next; }
 
         # Speed?
         if ( $_ eq 'ospeed' ) {
@@ -893,53 +890,29 @@ sub show_me_the_crap {
     $rs .= 'min = ' . (defined $cc{'MIN'} ? $cc{'MIN'} : 0) . '; time = ' . (defined $cc{'TIME'} ? $cc{'TIME'} : 0) . ";\n";
 
     # c flags.
-    $rs .= ( ( $c_cflag & CLOCAL ) ? '' : '-' ) . 'clocal ';
-    $rs .= ( ( $c_cflag & CREAD )  ? '' : '-' ) . 'cread ';
-    $rs .= ( ( $c_cflag & CSTOPB ) ? '' : '-' ) . 'cstopb ';
-    $rs .= ( ( $c_cflag & HUPCL )  ? '' : '-' ) . 'hupcl ';
-    $rs .= ( ( $c_cflag & PARENB ) ? '' : '-' ) . 'parenb ';
-    $rs .= ( ( $c_cflag & PARODD ) ? '' : '-' ) . 'parodd ';
-    $c_cflag = $c_cflag & CS8;
-
-    if ( $c_cflag == CS8 ) {
-        $rs .= "cs8\n";
+    for my $pair (@CFLAG_DISPLAY) {
+        $rs .= ( ( $c_cflag & $pair->[0] ) ? '' : '-' ) . "$pair->[1] ";
     }
-    elsif ( $c_cflag == CS7 ) {
-        $rs .= "cs7\n";
-    }
-    elsif ( $c_cflag == CS6 ) {
-        $rs .= "cs6\n";
-    }
-    else {
-        $rs .= "cs5\n";
-    }
+    my $cs_bits = $c_cflag & CS8;
+    if    ( $cs_bits == CS8 ) { $rs .= "cs8\n"; }
+    elsif ( $cs_bits == CS7 ) { $rs .= "cs7\n"; }
+    elsif ( $cs_bits == CS6 ) { $rs .= "cs6\n"; }
+    else                      { $rs .= "cs5\n"; }
 
     # l flags.
-    $rs .= ( ( $c_lflag & ECHO )   ? '' : '-' ) . 'echo ';
-    $rs .= ( ( $c_lflag & ECHOE )  ? '' : '-' ) . 'echoe ';
-    $rs .= ( ( $c_lflag & ECHOK )  ? '' : '-' ) . 'echok ';
-    $rs .= ( ( $c_lflag & ECHONL ) ? '' : '-' ) . 'echonl ';
-    $rs .= ( ( $c_lflag & ICANON ) ? '' : '-' ) . 'icanon ';
-    $rs .= ( ( $c_lflag & ISIG )   ? '' : '-' ) . 'isig ';
-    $rs .= ( ( $c_lflag & NOFLSH ) ? '' : '-' ) . 'noflsh ';
-    $rs .= ( ( $c_lflag & TOSTOP ) ? '' : '-' ) . 'tostop ';
-    $rs .= ( ( $c_lflag & IEXTEN ) ? '' : '-' ) . 'iexten ';
+    for my $pair (@LFLAG_DISPLAY) {
+        $rs .= ( ( $c_lflag & $pair->[0] ) ? '' : '-' ) . "$pair->[1] ";
+    }
 
-    # o flag. jam it after the l flags so it looks more compact.
+    # o flag — appended after l flags for compact display.
     $rs .= ( ( $c_oflag & OPOST ) ? '' : '-' ) . "opost\n";
 
-    #  i flags.
-    $rs .= ( ( $c_iflag & BRKINT ) ? '' : '-' ) . 'brkint ';
-    $rs .= ( ( $c_iflag & IGNBRK ) ? '' : '-' ) . 'ignbrk ';
-    $rs .= ( ( $c_iflag & IGNPAR ) ? '' : '-' ) . 'ignpar ';
-    $rs .= ( ( $c_iflag & PARMRK ) ? '' : '-' ) . 'parmrk ';
-    $rs .= ( ( $c_iflag & INPCK )  ? '' : '-' ) . 'inpck ';
-    $rs .= ( ( $c_iflag & ISTRIP ) ? '' : '-' ) . 'istrip ';
-    $rs .= ( ( $c_iflag & INLCR )  ? '' : '-' ) . 'inlcr ';
-    $rs .= ( ( $c_iflag & IGNCR )  ? '' : '-' ) . 'igncr ';
-    $rs .= ( ( $c_iflag & ICRNL )  ? '' : '-' ) . 'icrnl ';
-    $rs .= ( ( $c_iflag & IXON )   ? '' : '-' ) . 'ixon ';
-    $rs .= ( ( $c_iflag & IXOFF )  ? '' : '-' ) . "ixoff\n";
+    # i flags.
+    for my $i ( 0 .. $#IFLAG_DISPLAY ) {
+        my $pair = $IFLAG_DISPLAY[$i];
+        my $sep = ( $i == $#IFLAG_DISPLAY ) ? "\n" : ' ';
+        $rs .= ( ( $c_iflag & $pair->[0] ) ? '' : '-' ) . "$pair->[1]$sep";
+    }
     return $rs;
 }
 
