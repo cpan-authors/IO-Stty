@@ -267,7 +267,8 @@ either literally, in hat notation (\`^c'), or as an integer
 which may start with \`0x' to indicate hexadecimal, \`0' to
 indicate octal, or any other digit to indicate decimal.
 Giving a value of \`^-' or \`undef' disables that special
-character.
+character (sets it to `_POSIX_VDISABLE`, which is 0 on
+Linux and 255 on macOS/BSD).
 
 - intr
 
@@ -341,6 +342,10 @@ character.
     used  as  an  argument  to  another stty command to
     restore the current settings.
 
+- speed
+
+    Print the output baud rate.
+
 - -v,--version
 
     Print version info.
@@ -353,7 +358,8 @@ character.
 
     Parse a special character value from any of the supported notations:
     literal integers, hat notation (`^c`), hexadecimal (`0x...`),
-    octal (`0...`), or `undef`/`^-` to disable.
+    octal (`0...`), or `undef`/`^-` to disable (returns
+    `_POSIX_VDISABLE`).
 
 - **stty()**
 
