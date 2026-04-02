@@ -73,7 +73,7 @@ my %CC_NAMES = (
 # Ordered display lists for show_me_the_crap — preserves GNU-like output order.
 my @CFLAG_DISPLAY = ( [CLOCAL,'clocal'], [CREAD,'cread'], [CSTOPB,'cstopb'], [HUPCL,'hupcl'], [PARENB,'parenb'], [PARODD,'parodd'] );
 my @LFLAG_DISPLAY = ( [ECHO,'echo'], [ECHOE,'echoe'], [ECHOK,'echok'], [ECHONL,'echonl'], [ICANON,'icanon'], [ISIG,'isig'], [NOFLSH,'noflsh'], [TOSTOP,'tostop'], [IEXTEN,'iexten'] );
-my @IFLAG_DISPLAY = ( [BRKINT,'brkint'], [IGNBRK,'ignbrk'], [IGNPAR,'ignpar'], [PARMRK,'parmrk'], [INPCK,'inpck'], [ISTRIP,'istrip'], [INLCR,'inlcr'], [ICRNL,'icrnl'], [IXON,'ixon'], [IXOFF,'ixoff'] );
+my @IFLAG_DISPLAY = ( [BRKINT,'brkint'], [IGNBRK,'ignbrk'], [IGNPAR,'ignpar'], [PARMRK,'parmrk'], [INPCK,'inpck'], [ISTRIP,'istrip'], [INLCR,'inlcr'], [IGNCR,'igncr'], [ICRNL,'icrnl'], [IXON,'ixon'], [IXOFF,'ixoff'] );
 
 =for markdown [![testsuite](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml)
 
