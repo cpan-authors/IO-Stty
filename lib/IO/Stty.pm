@@ -5,7 +5,7 @@ use warnings;
 
 use POSIX;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # _POSIX_VDISABLE: the value that disables a special character slot.
 # On Linux this is typically 0; on macOS/BSD it is typically 255 (0xFF).
@@ -41,39 +41,49 @@ BEGIN {
 
 # Flag-to-constant lookup tables: map stty parameter names to POSIX constants.
 # Aliases (hup→HUPCL, crterase→ECHOE) are just extra table entries.
-my %CFLAGS = (
-    clocal => CLOCAL, cread  => CREAD,  cstopb => CSTOPB,
-    hupcl  => HUPCL,  hup    => HUPCL,  parenb => PARENB,
-    parodd => PARODD,
-);
-my %IFLAGS = (
-    brkint => BRKINT, icrnl  => ICRNL,  ignbrk => IGNBRK,
-    igncr  => IGNCR,  ignpar => IGNPAR, inlcr  => INLCR,
-    inpck  => INPCK,  istrip => ISTRIP, ixoff  => IXOFF,
-    ixon   => IXON,   parmrk => PARMRK,
-);
-my %LFLAGS = (
-    echo     => ECHO,   echoe    => ECHOE,  crterase => ECHOE,
-    echok    => ECHOK,  echonl   => ECHONL, icanon   => ICANON,
-    iexten   => IEXTEN, isig     => ISIG,   noflsh   => NOFLSH,
-    tostop   => TOSTOP,
-);
-my %OFLAGS = (
-    opost => OPOST,
-);
+# Wrapped in eval because Windows Perl exports these symbols but they die
+# when called ("Your vendor has not defined POSIX macro ...").
+my (%CFLAGS, %IFLAGS, %LFLAGS, %OFLAGS);
+my (@CFLAG_DISPLAY, @LFLAG_DISPLAY, @IFLAG_DISPLAY);
+BEGIN {
+    eval {
+        %CFLAGS = (
+            clocal => CLOCAL, cread  => CREAD,  cstopb => CSTOPB,
+            hupcl  => HUPCL,  hup    => HUPCL,  parenb => PARENB,
+            parodd => PARODD,
+        );
+        %IFLAGS = (
+            brkint => BRKINT, icrnl  => ICRNL,  ignbrk => IGNBRK,
+            igncr  => IGNCR,  ignpar => IGNPAR, inlcr  => INLCR,
+            inpck  => INPCK,  istrip => ISTRIP, ixoff  => IXOFF,
+            ixon   => IXON,   parmrk => PARMRK,
+        );
+        %LFLAGS = (
+            echo     => ECHO,   echoe    => ECHOE,  crterase => ECHOE,
+            echok    => ECHOK,  echonl   => ECHONL, icanon   => ICANON,
+            iexten   => IEXTEN, isig     => ISIG,   noflsh   => NOFLSH,
+            tostop   => TOSTOP,
+        );
+        %OFLAGS = (
+            opost => OPOST,
+        );
 
-# Control character name → hash key mapping
+        # Ordered display lists for show_me_the_crap — preserves GNU-like output order.
+        @CFLAG_DISPLAY = ( [CLOCAL,'clocal'], [CREAD,'cread'], [CSTOPB,'cstopb'], [HUPCL,'hupcl'], [PARENB,'parenb'], [PARODD,'parodd'] );
+        @LFLAG_DISPLAY = ( [ECHO,'echo'], [ECHOE,'echoe'], [ECHOK,'echok'], [ECHONL,'echonl'], [ICANON,'icanon'], [ISIG,'isig'], [NOFLSH,'noflsh'], [TOSTOP,'tostop'], [IEXTEN,'iexten'] );
+        @IFLAG_DISPLAY = ( [BRKINT,'brkint'], [IGNBRK,'ignbrk'], [IGNPAR,'ignpar'], [PARMRK,'parmrk'], [INPCK,'inpck'], [ISTRIP,'istrip'], [INLCR,'inlcr'], [IGNCR,'igncr'], [ICRNL,'icrnl'], [IXON,'ixon'], [IXOFF,'ixoff'] );
+    };
+    # On Windows/platforms without termios, hashes stay empty — the module loads
+    # but stty()/show_me_the_crap() will fail at runtime, same as before.
+}
+
+# Control character name → hash key mapping (no POSIX constants, always safe)
 my %CC_NAMES = (
     intr  => 'INTR',  quit  => 'QUIT',  erase => 'ERASE',
     kill  => 'KILL',  eof   => 'EOF',   eol   => 'EOL',
     start => 'START', stop  => 'STOP',  susp  => 'SUSP',
     min   => 'MIN',   time  => 'TIME',
 );
-
-# Ordered display lists for show_me_the_crap — preserves GNU-like output order.
-my @CFLAG_DISPLAY = ( [CLOCAL,'clocal'], [CREAD,'cread'], [CSTOPB,'cstopb'], [HUPCL,'hupcl'], [PARENB,'parenb'], [PARODD,'parodd'] );
-my @LFLAG_DISPLAY = ( [ECHO,'echo'], [ECHOE,'echoe'], [ECHOK,'echok'], [ECHONL,'echonl'], [ICANON,'icanon'], [ISIG,'isig'], [NOFLSH,'noflsh'], [TOSTOP,'tostop'], [IEXTEN,'iexten'] );
-my @IFLAG_DISPLAY = ( [BRKINT,'brkint'], [IGNBRK,'ignbrk'], [IGNPAR,'ignpar'], [PARMRK,'parmrk'], [INPCK,'inpck'], [ISTRIP,'istrip'], [INLCR,'inlcr'], [IGNCR,'igncr'], [ICRNL,'icrnl'], [IXON,'ixon'], [IXOFF,'ixoff'] );
 
 =for markdown [![testsuite](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/IO-Stty/actions/workflows/testsuite.yml)
 
