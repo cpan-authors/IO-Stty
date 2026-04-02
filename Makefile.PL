@@ -27,18 +27,7 @@ WriteMakefile(
         provides => {
             'IO::Stty' => {
                 file    => 'lib/IO/Stty.pm',
-                version => do {
-                    my $v;
-                    if (open my $fh, '<', 'lib/IO/Stty.pm') {
-                        while (<$fh>) {
-                            if (/\$VERSION\s*=\s*'([^']+)'/) {
-                                $v = $1;
-                                last;
-                            }
-                        }
-                    }
-                    $v || '0';
-                },
+                version => MM->parse_version('lib/IO/Stty.pm'),
             },
         },
         resources => {
