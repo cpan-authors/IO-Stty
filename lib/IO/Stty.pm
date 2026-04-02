@@ -926,6 +926,7 @@ sub show_me_the_crap {
     $rs .= ( ( $c_iflag & INPCK )  ? '' : '-' ) . 'inpck ';
     $rs .= ( ( $c_iflag & ISTRIP ) ? '' : '-' ) . 'istrip ';
     $rs .= ( ( $c_iflag & INLCR )  ? '' : '-' ) . 'inlcr ';
+    $rs .= ( ( $c_iflag & IGNCR )  ? '' : '-' ) . 'igncr ';
     $rs .= ( ( $c_iflag & ICRNL )  ? '' : '-' ) . 'icrnl ';
     $rs .= ( ( $c_iflag & IXON )   ? '' : '-' ) . 'ixon ';
     $rs .= ( ( $c_iflag & IXOFF )  ? '' : '-' ) . "ixoff\n";
