@@ -41,6 +41,12 @@ ship (e.g. `CLAUDE.md`, `.github/`, `.gitignore`, `.*rc` config files, and `cpan
 
 ## Release
 
+Releases are **human-only**. Automated agents (Claude Code, Kōan, etc.) must
+**never** bump `$VERSION`, update `Changes`, run `make dist`, or perform any
+other release-preparation step. These are manual, intentional acts.
+
+The human release process is:
+
 1. Update `Changes` with new version and entries.
 2. Bump `$VERSION` in `lib/IO/Stty.pm` (only place it's set; `Makefile.PL` reads it via `VERSION_FROM`).
 3. Run `make readme` to regenerate `README.md`.
