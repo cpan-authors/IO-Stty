@@ -441,6 +441,12 @@ C<_POSIX_VDISABLE>).
 sub _parse_char_value {
     my ($val) = @_;
 
+    # Missing value (e.g. stty('intr') without a second arg)
+    unless ( defined $val ) {
+        warn "IO::Stty: missing value for special character setting\n";
+        return undef;
+    }
+
     # undef or ^- means disable the character
     if ( $val eq 'undef' || $val eq '^-' ) {
         return $VDISABLE;
@@ -712,17 +718,17 @@ sub stty {
         # Now the fun part.
 
         # c_cc field crap.
-        if ( $_ eq 'intr' )  { $control_chars{'INTR'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'quit' )  { $control_chars{'QUIT'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'erase' ) { $control_chars{'ERASE'} = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'kill' )  { $control_chars{'KILL'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'eof' )   { $control_chars{'EOF'}   = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'eol' )   { $control_chars{'EOL'}   = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'start' ) { $control_chars{'START'} = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'stop' )  { $control_chars{'STOP'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'susp' )  { $control_chars{'SUSP'}  = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'min' )   { $control_chars{'MIN'}   = _parse_char_value( shift @parameters ); next; }
-        if ( $_ eq 'time' )  { $control_chars{'TIME'}  = _parse_char_value( shift @parameters ); next; }
+        if ( $_ eq 'intr' )  { my $v = _parse_char_value( shift @parameters ); $control_chars{'INTR'}  = $v if defined $v; next; }
+        if ( $_ eq 'quit' )  { my $v = _parse_char_value( shift @parameters ); $control_chars{'QUIT'}  = $v if defined $v; next; }
+        if ( $_ eq 'erase' ) { my $v = _parse_char_value( shift @parameters ); $control_chars{'ERASE'} = $v if defined $v; next; }
+        if ( $_ eq 'kill' )  { my $v = _parse_char_value( shift @parameters ); $control_chars{'KILL'}  = $v if defined $v; next; }
+        if ( $_ eq 'eof' )   { my $v = _parse_char_value( shift @parameters ); $control_chars{'EOF'}   = $v if defined $v; next; }
+        if ( $_ eq 'eol' )   { my $v = _parse_char_value( shift @parameters ); $control_chars{'EOL'}   = $v if defined $v; next; }
+        if ( $_ eq 'start' ) { my $v = _parse_char_value( shift @parameters ); $control_chars{'START'} = $v if defined $v; next; }
+        if ( $_ eq 'stop' )  { my $v = _parse_char_value( shift @parameters ); $control_chars{'STOP'}  = $v if defined $v; next; }
+        if ( $_ eq 'susp' )  { my $v = _parse_char_value( shift @parameters ); $control_chars{'SUSP'}  = $v if defined $v; next; }
+        if ( $_ eq 'min' )   { my $v = _parse_char_value( shift @parameters ); $control_chars{'MIN'}   = $v if defined $v; next; }
+        if ( $_ eq 'time' )  { my $v = _parse_char_value( shift @parameters ); $control_chars{'TIME'}  = $v if defined $v; next; }
 
         # c_cflag crap
         if ( $_ eq 'clocal' ) { $c_cflag = ( $set_value ? ( $c_cflag | CLOCAL ) : ( $c_cflag & ( ~CLOCAL ) ) ); next; }
@@ -771,12 +777,20 @@ sub stty {
         # Speed?
         if ( $_ eq 'ospeed' ) {
             my $rate = shift(@parameters);
+            unless ( defined $rate ) {
+                warn "IO::Stty::stty: 'ospeed' requires a value\n";
+                next;
+            }
             exists $BAUD_RATES{$rate} or warn "IO::Stty::stty: unknown baud rate '$rate'\n";
             $ospeed = $BAUD_RATES{$rate} if exists $BAUD_RATES{$rate};
             next;
         }
         if ( $_ eq 'ispeed' ) {
             my $rate = shift(@parameters);
+            unless ( defined $rate ) {
+                warn "IO::Stty::stty: 'ispeed' requires a value\n";
+                next;
+            }
             exists $BAUD_RATES{$rate} or warn "IO::Stty::stty: unknown baud rate '$rate'\n";
             $ispeed = $BAUD_RATES{$rate} if exists $BAUD_RATES{$rate};
             next;
