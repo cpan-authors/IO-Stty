@@ -50,10 +50,20 @@ my @tests = (
     [ '^-',    $VDISABLE, '^- disables character (returns _POSIX_VDISABLE)' ],
 );
 
-plan tests => scalar @tests;
+plan tests => scalar(@tests) + 2;
 
 for my $test (@tests) {
     my ( $input, $expected, $desc ) = @$test;
     my $got = IO::Stty::_parse_char_value($input);
     is( $got, $expected, $desc );
+}
+
+# Passing undef (missing value) should warn and return undef, not crash
+{
+    my @warnings;
+    local $SIG{__WARN__} = sub { push @warnings, $_[0] };
+    my $got = IO::Stty::_parse_char_value(undef);
+    is( $got, undef, '_parse_char_value(undef) returns undef' );
+    like( $warnings[0] || '', qr/missing value/i,
+        '_parse_char_value(undef) warns about missing value' );
 }
