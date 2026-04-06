@@ -70,6 +70,9 @@ IO::Stty - Change and print terminal line settings
      # What settings do we have anyway?
      print IO::Stty::stty(\*STDIN,'-a');
 
+     # Or with no arguments (same as -a):
+     print IO::Stty::stty(\*STDIN);
+
 =head1 DESCRIPTION
 
 This is the PERL POSIX compliant stty. 
@@ -483,9 +486,11 @@ sub _parse_char_value {
 
     IO::Stty::stty(\*STDIN, @params);
 
-Returns a string for query options (C<-a>, C<-g>, C<-v>), C<undef> if
-the handle is not a terminal or if the terminal parameters could not be
-read, and a true value on success when setting parameters.
+When called with no parameters, returns the current terminal settings in
+human-readable form (equivalent to C<-a>), matching POSIX C<stty>
+behavior.  Returns a string for query options (C<-a>, C<-g>, C<-v>),
+C<undef> if the handle is not a terminal or if the terminal parameters
+could not be read, and a true value on success when setting parameters.
 
 From comments:
 
@@ -499,8 +504,6 @@ From comments:
 
 sub stty {
     my $tty_handle = shift;    # This should be a \*HANDLE
-
-    @_ or die("No parameters passed to stty");
 
     # Notice fileno() instead of handle->fileno(). I want it to work with
     # normal fhs.
@@ -536,6 +539,14 @@ sub stty {
     $control_chars{'EOL'}   = $termios->getcc(VEOL);
 
     # OK.. we have our crap.
+
+    # No arguments: display current settings (POSIX stty behavior).
+    unless (@_) {
+        return show_me_the_crap(
+            $c_cflag, $c_iflag, $ispeed, $c_lflag, $c_oflag,
+            $ospeed,  \%control_chars
+        );
+    }
 
     my @parameters;
 

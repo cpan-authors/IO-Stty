@@ -29,6 +29,9 @@ IO::Stty - Change and print terminal line settings
      # What settings do we have anyway?
      print IO::Stty::stty(\*STDIN,'-a');
 
+     # Or with no arguments (same as -a):
+     print IO::Stty::stty(\*STDIN);
+
 # DESCRIPTION
 
 This is the PERL POSIX compliant stty. 
@@ -365,9 +368,11 @@ Linux and 255 on macOS/BSD).
 
         IO::Stty::stty(\*STDIN, @params);
 
-    Returns a string for query options (`-a`, `-g`, `-v`), `undef` if
-    the handle is not a terminal or if the terminal parameters could not be
-    read, and a true value on success when setting parameters.
+    When called with no parameters, returns the current terminal settings in
+    human-readable form (equivalent to `-a`), matching POSIX `stty`
+    behavior.  Returns a string for query options (`-a`, `-g`, `-v`),
+    `undef` if the handle is not a terminal or if the terminal parameters
+    could not be read, and a true value on success when setting parameters.
 
     From comments:
 

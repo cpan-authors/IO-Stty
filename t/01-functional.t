@@ -176,6 +176,21 @@ subtest '-a output format' => sub {
     like($output, qr/intr\s*=/,       '-a shows intr control char');
 };
 
+# ── 3b. No-argument display (POSIX stty behavior) ───────────────────
+
+subtest 'no arguments returns current settings' => sub {
+    my ($pty, $slave) = fresh_pty();
+    my $output = IO::Stty::stty($slave);
+    ok(defined $output, 'no-arg stty returns output');
+    like($output, qr/speed \d+ baud/, 'no-arg output contains speed line');
+    like($output, qr/echo/,           'no-arg output mentions echo');
+    like($output, qr/icanon/,         'no-arg output mentions icanon');
+
+    # Should be identical to -a output
+    my $a_output = IO::Stty::stty($slave, '-a');
+    is($output, $a_output, 'no-arg output matches -a output');
+};
+
 # ── 4. Combination settings ──────────────────────────────────────────
 
 subtest 'raw mode' => sub {
@@ -429,6 +444,13 @@ subtest 'non-tty handle returns undef' => sub {
     open my $fh, '<', '/dev/null' or die "open /dev/null: $!";
     my $result = IO::Stty::stty($fh, '-a');
     is($result, undef, 'non-tty returns undef');
+    close $fh;
+};
+
+subtest 'non-tty handle with no args returns undef' => sub {
+    open my $fh, '<', '/dev/null' or die "open /dev/null: $!";
+    my $result = IO::Stty::stty($fh);
+    is($result, undef, 'non-tty with no args returns undef (no die)');
     close $fh;
 };
 
