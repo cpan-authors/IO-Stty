@@ -460,8 +460,10 @@ sub _parse_char_value {
         return hex($1);
     }
 
-    # Octal: 0 followed by digits (but not plain "0" which is decimal zero)
-    if ( $val =~ /^0(\d+)$/ ) {
+    # Octal: 0 followed by octal digits (0-7).  We deliberately exclude
+    # 8 and 9 so that inputs like "08" or "09" fall through to the decimal
+    # path instead of being silently truncated by oct().
+    if ( $val =~ /^0([0-7]+)$/ ) {
         return oct($1);
     }
 
