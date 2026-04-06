@@ -45,6 +45,11 @@ my @tests = (
     [ '017',  15,   'octal 017' ],
     [ '0177', 127,  'octal 0177' ],
 
+    # Digits 8/9 after leading zero: NOT octal, treated as decimal
+    [ '08',   8,    '08 is decimal 8, not invalid octal' ],
+    [ '09',   9,    '09 is decimal 9, not invalid octal' ],
+    [ '019',  19,   '019 is decimal 19 (contains non-octal digit)' ],
+
     # undef / ^- (returns _POSIX_VDISABLE, which is 0 on Linux, 255 on macOS)
     [ 'undef', $VDISABLE, 'undef disables character (returns _POSIX_VDISABLE)' ],
     [ '^-',    $VDISABLE, '^- disables character (returns _POSIX_VDISABLE)' ],
