@@ -3,6 +3,7 @@ package IO::Stty;
 use strict;
 use warnings;
 
+use Carp;
 use POSIX;
 
 our $VERSION = '0.08';
@@ -475,7 +476,7 @@ sub _parse_char_value {
         return ord($val);
     }
 
-    warn "IO::Stty: unrecognized character value '$val'\n";
+    carp "IO::Stty: unrecognized character value '$val'";
     return 0;
 }
 
@@ -500,7 +501,7 @@ From comments:
 sub stty {
     my $tty_handle = shift;    # This should be a \*HANDLE
 
-    @_ or die("No parameters passed to stty");
+    @_ or croak("No parameters passed to stty");
 
     # Notice fileno() instead of handle->fileno(). I want it to work with
     # normal fhs.
@@ -513,7 +514,7 @@ sub stty {
     # make a terminal object.
     my ($termios) = POSIX::Termios->new();
     unless ( $termios->getattr($file_num) ) {
-        warn "Couldn't get terminal parameters for '$tty_name', file num ($file_num)";
+        carp "Couldn't get terminal parameters for '$tty_name', file num ($file_num)";
         return undef;
     }
     my ($c_cflag) = $termios->getcflag;
@@ -771,20 +772,20 @@ sub stty {
         # Speed?
         if ( $_ eq 'ospeed' ) {
             my $rate = shift(@parameters);
-            exists $BAUD_RATES{$rate} or warn "IO::Stty::stty: unknown baud rate '$rate'\n";
+            exists $BAUD_RATES{$rate} or carp "IO::Stty: unknown baud rate '$rate'";
             $ospeed = $BAUD_RATES{$rate} if exists $BAUD_RATES{$rate};
             next;
         }
         if ( $_ eq 'ispeed' ) {
             my $rate = shift(@parameters);
-            exists $BAUD_RATES{$rate} or warn "IO::Stty::stty: unknown baud rate '$rate'\n";
+            exists $BAUD_RATES{$rate} or carp "IO::Stty: unknown baud rate '$rate'";
             $ispeed = $BAUD_RATES{$rate} if exists $BAUD_RATES{$rate};
             next;
         }
 
         # Default.. parameter hasn't matched anything
         #    print "char:".sprintf("%lo",ord($_))."\n";
-        warn "IO::Stty::stty passed invalid parameter '$_'\n";
+        carp "IO::Stty: invalid parameter '$_'";
     }
 
     # What a pain in the ass! Ok.. let's write the crap back.
