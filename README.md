@@ -31,7 +31,7 @@ IO::Stty - Change and print terminal line settings
 
 # DESCRIPTION
 
-This is the PERL POSIX compliant stty. 
+This is a Perl POSIX compliant stty.
 
 # INTRO
 
@@ -391,6 +391,14 @@ Linux and 255 on macOS/BSD).
 
     This is the back-end for `stty(\*FH, '-a')`.
 
+# SEE ALSO
+
+[stty(1)](http://man.he.net/man1/stty) - the Unix command-line equivalent.
+
+[POSIX](https://metacpan.org/pod/POSIX) - provides the underlying `Termios` interface used by this module.
+
+[Term::ReadKey](https://metacpan.org/pod/Term%3A%3AReadKey) - another approach to terminal mode manipulation.
+
 # AUTHOR
 
 Austin Schutz <auschutz@cpan.org> (Initial version and maintenance)
@@ -405,7 +413,8 @@ blame me for it blowing up your machine because it's full of bugs.
 See above for what functions are supported. It's mostly standard POSIX
 stuff. If any of the settings are wrong and you actually know what some of
 these extremely arcane settings (like what 'sane' should be in POSIX land)
-really should be, please open an RT ticket.
+really should be, please open an issue at
+[https://github.com/cpan-authors/IO-Stty/issues](https://github.com/cpan-authors/IO-Stty/issues).
 
 # ACKNOWLEDGEMENTS
 

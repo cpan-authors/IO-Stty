@@ -72,7 +72,7 @@ IO::Stty - Change and print terminal line settings
 
 =head1 DESCRIPTION
 
-This is the PERL POSIX compliant stty. 
+This is a Perl POSIX compliant stty.
 
 =head1 INTRO
 
@@ -945,6 +945,14 @@ sub show_me_the_crap {
 
 =back
 
+=head1 SEE ALSO
+
+L<stty(1)> - the Unix command-line equivalent.
+
+L<POSIX> - provides the underlying C<Termios> interface used by this module.
+
+L<Term::ReadKey> - another approach to terminal mode manipulation.
+
 =head1 AUTHOR
 
 Austin Schutz <auschutz@cpan.org> (Initial version and maintenance)
@@ -959,7 +967,8 @@ blame me for it blowing up your machine because it's full of bugs.
 See above for what functions are supported. It's mostly standard POSIX
 stuff. If any of the settings are wrong and you actually know what some of
 these extremely arcane settings (like what 'sane' should be in POSIX land)
-really should be, please open an RT ticket.
+really should be, please open an issue at
+L<https://github.com/cpan-authors/IO-Stty/issues>.
 
 =head1 ACKNOWLEDGEMENTS
 
